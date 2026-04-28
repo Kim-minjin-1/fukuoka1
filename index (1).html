@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>임성빈 · 김민진 신혼여행 🇯🇵</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root {
+  --sand: #f5f0e8;
+  --sand-dark: #ede5d0;
+  --ink: #1a1510;
+  --ink-muted: #5a5248;
+  --ink-light: #8a8278;
+  --accent: #c8602a;
+  --accent-light: #f0d5c0;
+  --green: #3b6d3a;
+  --green-light: #e8f0e8;
+  --blue: #2a5c8a;
+  --blue-light: #dce8f5;
+  --red-light: #f5e0d8;
+  --red: #a83030;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background: var(--sand);
+  color: var(--ink);
+  font-weight: 300;
+  line-height: 1.7;
+}
+
+/* ── HERO ── */
+.hero {
+  background: var(--ink);
+  color: white;
+  text-align: center;
+  padding: 4rem 1.5rem 3rem;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 40px,
+    rgba(255,255,255,0.015) 40px,
+    rgba(255,255,255,0.015) 80px
+  );
+}
+.hero-eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: 1rem;
+}
+.hero-title {
+  font-family: 'Noto Serif KR', serif;
+  font-size: clamp(2rem, 6vw, 3.5rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.5rem;
+}
+.hero-heart { color: #e07060; }
+.hero-dates {
+  font-size: 13px;
+  color: rgba(255,255,255,0.55);
+  letter-spacing: 0.1em;
+  margin-bottom: 2rem;
+}
+.hero-chips {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.chip {
+  font-size: 11px;
+  padding: 4px 14px;
+  border-radius: 20px;
+  border: 0.5px solid rgba(255,255,255,0.25);
+  color: rgba(255,255,255,0.7);
+  letter-spacing: 0.05em;
+}
+
+/* ── NAV ── */
+.day-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--ink);
+  display: flex;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.day-nav::-webkit-scrollbar { display: none; }
+.nav-btn {
+  flex-shrink: 0;
+  padding: 10px 18px;
+  font-size: 12px;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-weight: 400;
+  color: rgba(255,255,255,0.5);
+  background: none;
+  border: none;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+.nav-btn:hover { color: rgba(255,255,255,0.85); }
+.nav-btn.active {
+  color: white;
+  border-bottom-color: var(--accent);
+}
+
+/* ── MAIN LAYOUT ── */
+main { max-width: 900px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+
+/* ── DAY SECTION ── */
+.day-section { display: none; }
+.day-section.active { display: block; }
+
+.day-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--sand-dark);
+}
+.day-num-block {
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.1;
+}
+.day-num-block .num { font-size: 18px; font-weight: 500; }
+.day-num-block .label { font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.7; }
+.day-title-block { flex: 1; }
+.day-title-block h2 {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 3px;
+}
+.day-title-block p { font-size: 13px; color: var(--ink-muted); }
+
+/* ── MAP ── */
+.map-wrap {
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--sand-dark);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+.map-container { height: 280px; }
+
+/* ── TIMELINE ── */
+.timeline { position: relative; padding-left: 20px; }
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 8px;
+  bottom: 0;
+  width: 1px;
+  background: var(--sand-dark);
+}
+.tl-item { position: relative; margin-bottom: 1rem; }
+.tl-dot {
+  position: absolute;
+  left: -20px;
+  top: 10px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 2px solid var(--sand);
+  background: var(--ink-light);
+}
+.tl-card {
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--sand-dark);
+  transition: box-shadow 0.2s;
+}
+.tl-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+.tl-card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--sand-dark);
+}
+.tl-time {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink-light);
+  min-width: 44px;
+  letter-spacing: 0.05em;
+}
+.tl-name { font-size: 13px; font-weight: 500; flex: 1; }
+.badge {
+  font-size: 10px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 20px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.badge-food { background: var(--red-light); color: var(--red); }
+.badge-shop { background: #fff3e0; color: #8a5e20; }
+.badge-go   { background: var(--blue-light); color: var(--blue); }
+.badge-see  { background: var(--green-light); color: var(--green); }
+.badge-rest { background: var(--sand-dark); color: var(--ink-muted); }
+.badge-fes  { background: #e8f5e8; color: #2e6b2e; }
+.badge-hotel{ background: var(--sand-dark); color: var(--ink-muted); }
+
+.tl-card-body { padding: 10px 14px; }
+.tl-desc { font-size: 12.5px; color: var(--ink-muted); line-height: 1.65; }
+.tl-tip {
+  font-size: 11.5px;
+  color: var(--accent);
+  margin-top: 6px;
+  padding: 5px 10px;
+  background: var(--accent-light);
+  border-radius: 6px;
+  line-height: 1.5;
+}
+
+/* ── FLIGHT CARD ── */
+.flight-card {
+  background: var(--ink);
+  color: white;
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 1rem;
+}
+.flight-row { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
+.f-time { font-size: 22px; font-weight: 500; letter-spacing: -0.02em; }
+.f-line {
+  flex: 1;
+  height: 1px;
+  background: rgba(255,255,255,0.2);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.f-line::after { content: '✈'; font-size: 14px; background: var(--ink); padding: 0 8px; }
+.f-detail { font-size: 12px; color: rgba(255,255,255,0.5); }
+
+/* ── HOTEL BAR ── */
+.hotel-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--sand-dark);
+  border-radius: 10px;
+  margin-top: 1rem;
+  border: 1px solid rgba(0,0,0,0.06);
+}
+.hotel-bar .icon { font-size: 16px; }
+.hotel-bar .text { font-size: 12px; color: var(--ink-muted); }
+.hotel-bar .name { font-weight: 500; color: var(--ink); }
+
+/* ── STAR RATING ── */
+.stars { color: #e0a040; font-size: 11px; margin-left: 4px; }
+
+/* ── BREAKFAST GRID ── */
+.breakfast-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 1rem; }
+.b-opt {
+  background: white;
+  border: 1px solid var(--sand-dark);
+  border-radius: 10px;
+  padding: 12px;
+}
+.b-opt-name { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+.b-opt-desc { font-size: 11.5px; color: var(--ink-muted); line-height: 1.5; }
+.b-opt-tag {
+  display: inline-block;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  margin-top: 6px;
+  background: var(--green-light);
+  color: var(--green);
+}
+
+@media (max-width: 500px) {
+  .breakfast-grid { grid-template-columns: 1fr; }
+  .day-header { gap: 12px; }
+  .hero-title { font-size: 1.8rem; }
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <p class="hero-eyebrow">2026 Honeymoon · Japan</p>
+  <h1 class="hero-title">임성빈 <span class="hero-heart">♥</span> 김민진</h1>
+  <p class="hero-dates">JUN 29 — JUL 4, 2026 · FUKUOKA / YUFUIN</p>
+  <div class="hero-chips">
+    <span class="chip">✈ 에어로케이 RF336/RF331</span>
+    <span class="chip">🏨 3개 숙소</span>
+    <span class="chip">🎏 야마카사 축제</span>
+    <span class="chip">♨ 유후인 온천</span>
+  </div>
+</header>
+
+<nav class="day-nav">
+  <button class="nav-btn active" onclick="showDay('d1')">DAY 1 · 6/29</button>
+  <button class="nav-btn" onclick="showDay('d2')">DAY 2 · 6/30</button>
+  <button class="nav-btn" onclick="showDay('d3')">DAY 3 · 7/1</button>
+  <button class="nav-btn" onclick="showDay('d4')">DAY 4 · 7/2</button>
+  <button class="nav-btn" onclick="showDay('d5')">DAY 5 · 7/3</button>
+  <button class="nav-btn" onclick="showDay('d6')">DAY 6 · 7/4</button>
+</nav>
+
+<main>
+
+<!-- ═══════════════ DAY 1 ═══════════════ -->
+<section class="day-section active" id="d1">
+  <div class="day-header">
+    <div class="day-num-block" style="background:#1a1510; color:white;">
+      <span class="num">1</span><span class="label">DAY</span>
+    </div>
+    <div class="day-title-block">
+      <h2>6월 29일 (월) — 출발일</h2>
+      <p>청주 → 후쿠오카 · VIA INN 하카타구치 숙박</p>
+    </div>
+  </div>
+  <div class="map-wrap"><div class="map-container" id="map1"></div></div>
+  <div class="flight-card">
+    <div class="flight-row">
+      <span class="f-time">16:00</span>
+      <span class="f-line"></span>
+      <span class="f-time">17:30</span>
+    </div>
+    <div class="f-detail">청주 CJJ → 후쿠오카 FUK · 에어로케이항공 RF336 · 비행 약 1시간 30분</div>
+  </div>
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="tl-dot" style="background:#2a5c8a;"></div>
+      <div class="tl-card">
+        <div class="tl-card-head">
+          <span class="tl-time">저녁</span>
+          <span class="tl-name">후쿠오카 도착 · 숙소 체크인</span>
+          <span class="badge badge-go">이동</span>
+        </div>
+        <div class="tl-card-body">
+          <p class="tl-desc">공항 국제선 → 셔틀버스 → 국내선 터미널 → 지하철 공항선 탑승 → 하카타역 하차 → 도보 이동.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="hotel-bar">
+    <span class="icon">🏨</span>
+    <div>
+      <div class="name">VIA INN HAKATAGUCHI EKIMAE JR WEST GROUP</div>
+      <div class="text">Single Room A for 2 People · Non-Smoking · 하카타구치역 앞</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ DAY 2 ═══════════════ -->
+<section class="day-section" id="d2">
+  <div class="day-header">
+    <div class="day-num-block" style="background:#3b6d3a; color:white;">
+      <span class="num">2</span><span class="label">DAY</span>
+    </div>
+    <div class="day-title-block">
+      <h2>6월 30일 (화) — 유후인 이동</h2>
+      <p>유유 버스투어 · 히타 · 벳부 · 유후인 도착</p>
+    </div>
+  </div>
+  <div class="map-wrap"><div class="map-container" id="map2"></div></div>
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="tl-dot" style="background:#3b6d3a;"></div>
+      <div class="tl-card">
+        <div class="tl-card-head">
+          <span class="tl-time">오전</span>
+          <span class="tl-name">유유 버스투어 탑승</span>
+          <span class="badge badge-go">투어</span>
+        </div>
+        <div class="tl-card-body">
+          <p class="tl-desc">후쿠오카 출발 → 히타 경유 → 벳부 경유 → 유후인 하차. 1인 48,000원 × 2인 = 96,000원.</p>
+          <p class="tl-tip">💡 [유유 버스투어] 후쿠오카 히타 벳부 유후인 투어 — 유후인 승하차 가능 상품</p>
+        </div>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot" style="background:#3b6d3a;"></div>
+      <div class="tl-card">
+        <div class="tl-card-head">
+          <span class="tl-time">오후</span>
+          <span class="tl-name">유후인 도착 · 체크인</span>
+          <span class="badge badge-rest">숙소</span>
+        </div>
+        <div class="tl-card-body">
+          <p class="tl-desc">유후인역 버스센터 하차 → 숙소 체크인 → 온천 입욕 → 석식 (숙소 제공).</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="hotel-bar">
+    <span class="icon">♨</span>
+    <div>
+      <div class="name">유후인 온천 키쇼카이운테이 무진조</div>
+      <div class="text">Japanese Style 6 Tatami · 조식/석식 포함 · 1박</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ DAY 3 ═══════════════ -->
+<section class="day-section" id="d3">
+  <div class="day-header">
+    <div class="day-num-block" style="background:#3b6d3a; color:white;">
+      <span class="num">3</span><span class="label">DAY</span>
+    </div>
+    <div class="day-title-block">
+      <h2>7월 1일 (수) — 유후인 자유일정</h2>
+      <p>긴린코 · 유노츠보 거리 · 온천 힐링</p>
+    </div>
+  </div>
+  <div class="map-wrap"><div class="map-container" id="map3"></div></div>
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="tl-dot" style="background:#3b6d3a;"></div>
+      <div class="tl-card">
+        <div class="tl-card-head">
+          <span class="tl-time">아침</span>
+          <span class="tl-name">조식 (숙소 제공)</span>
+          <span class="badge badge-food">식사</span>
+        </div>
+        <div class="tl-card-body">
+          <p class="tl-desc">숙소에서 전통 일본식 아침식사.</p>
+        </div>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot" style="background:#2a7a5a;"></div>
+      <div class="tl-card">
+        <div class="tl-card-head">
+          <span class="tl-time">오전</span>
+          <span class="tl-name">긴린코 (金鱗湖) 호수 산책</span>
+          <span class="badge badge-see">관광</span>
+        </div>
+        <div class="tl-card-body">
+          <p class="tl-desc">유후인 대표 명소. 온천수와 냉수가 섞여 물안개가 피어오르는 신비로운 호수. 이른 오전 방문 시 몽환적인 풍경 감상 가능.</p>
+        </div>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot" style="background:#8a5e20;"></div>
+      <div class="tl-card">
+        <div class="tl-card-head">
+          <span class="tl-time">오전</span>
+          <span class="tl-name">유후인 플로랄 빌리지</span>
+          <span class="badge badge-see">관광</span>
+        </div>
+        <div class="tl-card-body">
+          <p class="tl-desc">영국 코츠월드풍 유럽 마을 콘셉트. 아기자기한 상점과 포토스팟. 신혼여행 커플 사진 명소.</p>
+        </div>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot" style="background:#8a5e20;"></div>
+      <div class="tl-card">
+        <div class="tl-card-head">
+          <span class="tl-time">오후</span>
+          <span class="tl-name">유노츠보 거리 쇼핑</span>
+          <span class="badge badge-shop">쇼핑</span>
+        </div>
+        <div class="tl-card-body">
+          <p class="tl-desc">유후인 메인 쇼핑 거리. 롤케이크, 지역 특산품, 잡화, 기념품 구경. 약 800m 거리를 천천히 산책.</p>
+        </div>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot" style="background:#3b6d3a;"></div>
+      <div class="tl-card">
+        <div class="tl-card-head">
+          <span class="tl-time">저녁</span>
+          <span class="tl-name">온천 입욕 · 석식 (숙소 제공)</span>
+          <span class="badge badge-rest">휴식</span>
+        </div>
+        <div class="tl-card-body">
+          <p class="tl-desc">숙소 온천에서 여행 피로 회복 → 석식 (코스 요리 포함).</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="hotel-bar">
+    <span class="icon">♨</span>
+    <div>
+      <div class="name">유후인 온천 키쇼카이운테이 무진조</div>
+      <div class="text">Japanese Style 6 Tatami · 조식/석식 포함 · 2박째</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ DAY 4 ═══════════════ -->
+<section class="day-section" id="d4">
+  <div class="day-header">
+    <div class="day-num-block" style="background:#8a5e20; color:white;">
+      <span class="num">4</span><span class="label">DAY</span>
+    </div>
+    <div class="day-title-block">
+      <h2>7월 2일 (목) — 유후인 → 후쿠오카</h2>
+      <p>고속버스 이동 · 텐진 체크인 · 모츠나베</p>
+    </div>
+  </div>
+  <div class="map-wrap"><div class="map-container" id="map4"></div></div>
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="tl-dot" style="background:#3b6d3a;"></div>
+      <div class="tl-card">
+        <div class="tl-card-head">
+          <span class="tl-time">아침</span>
+          <span class="tl-name">조식 · 체크아웃</span>
+          <span class="badge badge-food">식사</span>
+        </div>
+        <div class="tl-card-body">
+          <p class="tl-desc">무진조 마지막 조식 후 체크아웃.</p>
+        </div>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot" style="background:#2a5c8a;"></div>
+      <div class="tl-card">
+        <div class="tl-card-head">
+          <span class="tl-time">오전</span>
+          <span class="tl-name">유후인 → 텐진 고속버스</span>
+          <span class="badge badge-go">이동</span>
+        </div>
+        <div class="tl-card-body">
+          <p class="tl-desc">유후인역 버스센터 출발 → 텐진 고속버스터미널 도착. 약 2시간 30분 · 편도 3,250엔/인.</p>
+          <p class="tl-tip">⚠️ 인기 노선 — 6월 2일 예약 오픈 즉시 예약 필수!</p>
+        </div>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot" style="background:#8a5e20;"></div>
+      <div class="tl-card">
+        <div class="tl-card-head">
+          <span class="tl-time">오후</span>
+          <span class="tl-name">Nishitetsu Grand Hotel 체크인 · 다이묘 쇼핑</span>
+          <span class="badge badge-shop">쇼핑</span>
+        </div>
+        <div class="tl-card-body">
+          <p class="tl-desc">숙소 체크인 후 바로 앞 다이묘 편집숍 골목 + 이와타야 백화점 B1 식품관 구경.</p>
+        </div>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot" style="background:#a83030;"></div>
+      <div class="tl-card">
+        <div class="tl-card-head">
+          <span class="tl-time">저녁 17:00~</span>
+          <span class="tl-name">모츠나베 락텐치 텐진 WEST<span class="stars">★ 4.8</span></span>
+          <span class="badge badge-food">맛집</span>
+        </div>
+        <div class="tl-card-body">
+          <p class="tl-desc">후쿠오카 대표 음식 모츠나베(곱창전골). 리뷰 11,000건 이상. 17:00 오픈. 챔폰 국수 마무리 필수!</p>
+          <p class="tl-tip">💡 오픈 시간 맞춰 일찍 방문하거나 예약 추천.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="hotel-bar">
+    <span class="icon">🏨</span>
+    <div>
+      <div class="name">Nishitetsu Grand Hotel</div>
+      <div class="text">텐진 다이묘 · 2박 · 7/2~7/4</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ DAY 5 ═══════════════ -->
+<section class="day-section" id="d5">
+  <div class="day-header">
+    <div class="day-num-block" style="background:#8a5e20; color:white;">
+      <span class="num">5</span><span class="label">DAY</span>
+    </div>
+    <div class="day-title-block">
+      <h2>7월 3일 (금) — 후쿠오카 풀데이</h2>
+      <p>쇼핑 + 야마카사 축제 + 스시 + 야타이</p>
+    </div>
+  </div>
+  <div class="map-wrap"><div class="map-container" id="map5"></div></div>
+
+  <div style="margin-bottom:1rem;">
+    <p style="font-size:11px; font-weight:500; color:var(--ink-light); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:8px;">아침식사 선택</p>
+    <div class="breakfast-grid">
+      <div class="b-opt">
+        <div class="b-opt-name">Park South Sandwich ⭐4.5</div>
+        <div class="b-opt-desc">핸드드립 커피 + 규카츠 샌드위치. 도보 1분. 08:00 오픈.</div>
+        <span class="b-opt-tag">도보 1분 · 추천</span>
+      </div>
+      <div class="b-opt">
+        <div class="b-opt-name">NOOICE Tenjin ⭐4.4</div>
+        <div class="b-opt-desc">크렘브륄레 팬케이크 맛집. 도보 10분. 08:00 오픈.</div>
+        <span class="b-opt-tag" style="background:#dce8f5; color:#2a5c8a;">도보 10분</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="tl-dot" style="background:#8a5e20;"></div>
+      <div class="tl-card">
+        <div class="tl-card-head">
+          <span class="tl-time">10:00</span>
+          <span class="tl-name">텐진 지하상가 + 솔라리아 플라자</span>
+          <span class="badge badge-shop">쇼핑</span>
+        </div>
+        <div class="tl-card-body">
+          <p class="tl-desc">약 600m 지하 쇼핑 아케이드. 화장품·패션·잡화·드럭스토어. 이와타야 백화점까지 연결.</p>
+        </div>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot" style="background:#a83030;"></div>
+      <div class="tl-card">
+        <div class="tl-card-head">
+          <span class="tl-time">11:30</span>
+          <span class="tl-name">우오츄 (가이센동)<span class="stars">★ 4.4</span></span>
+          <span class="badge badge-food">점심</span>
+        </div>
+        <div class="tl-card-body">
+          <p class="tl-desc">이마이즈미 인기 해산물 정식집. 제철 가이센동 + 작은 반찬 다수. 11:30 오픈 · 도보 7분.</p>
+          <p class="tl-tip">⚠️ 인기 맛집 — 11:20 출발해서 오픈런 추천!</p>
+        </div>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot" style="background:#2e6b2e;"></div>
+      <div class="tl-card">
+        <div class="tl-card-head">
+          <span class="tl-time">13:30</span>
+          <span class="tl-name">🎏 구시다 신사 · 가자리야마카사 관람</span>
+          <span class="badge badge-fes">야마카사</span>
+        </div>
+        <div class="tl-card-body">
+          <p class="tl-desc">높이 10m 화려한 장식 가마 관람 + 신사 참배. 7월 1일~15일 시내 14곳 설치. 하카타역 도보 10분.</p>
+          <p class="tl-tip">💡 가마 앞에서 신혼여행 기념 사진 찍기 딱 좋은 스팟!</p>
+        </div>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot" style="background:#8a5e20;"></div>
+      <div class="tl-card">
+        <div class="tl-card-head">
+          <span class="tl-time">14:30</span>
+          <span class="tl-name">카와바타 상점가 · 캐널시티 하카타</span>
+          <span class="badge badge-shop">쇼핑</span>
+        </div>
+        <div class="tl-card-body">
+          <p class="tl-desc">구시다 신사 바로 앞 400m 아케이드 기념품 쇼핑 → 도보 5분 거리 캐널시티 대형몰. 야외 야마카사 전시도 함께 감상.</p>
+        </div>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot" style="background:#a83030;"></div>
+      <div class="tl-card">
+        <div class="tl-card-head">
+          <span class="tl-time">17:30</span>
+          <span class="tl-name">이치이 스시 (오마카세)<span class="stars">★ 4.6</span></span>
+          <span class="badge badge-food">저녁</span>
+        </div>
+        <div class="tl-card-body">
+          <p class="tl-desc">노부부가 운영하는 소박한 스시집. 2,500엔에 니기리 10관 오마카세. 최상급 생선, 아늑한 카운터 분위기. 17:30 오픈.</p>
+          <p class="tl-tip">💡 좌석이 적어 오픈 시간 맞춰 방문 필수!</p>
+        </div>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot" style="background:#2e6b2e;"></div>
+      <div class="tl-card">
+        <div class="tl-card-head">
+          <span class="tl-time">20:00</span>
+          <span class="tl-name">🏮 야타이 — 텐진 나카강변</span>
+          <span class="badge badge-fes">야식</span>
+        </div>
+        <div class="tl-card-body">
+          <p class="tl-desc">야마카사 기간 활기찬 포장마차 거리. 멘타이 교자 · 꼬치구이 · 하이볼 한 잔. 신혼여행 마지막 밤 마무리!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="hotel-bar">
+    <span class="icon">🏨</span>
+    <div>
+      <div class="name">Nishitetsu Grand Hotel</div>
+      <div class="text">텐진 다이묘 · 마지막 밤</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ DAY 6 ═══════════════ -->
+<section class="day-section" id="d6">
+  <div class="day-header">
+    <div class="day-num-block" style="background:#1a1510; color:white;">
+      <span class="num">6</span><span class="label">DAY</span>
+    </div>
+    <div class="day-title-block">
+      <h2>7월 4일 (토) — 귀국일</h2>
+      <p>후쿠오카 출발 → 청주 도착</p>
+    </div>
+  </div>
+  <div class="map-wrap"><div class="map-container" id="map6"></div></div>
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="tl-dot" style="background:#2a5c8a;"></div>
+      <div class="tl-card">
+        <div class="tl-card-head">
+          <span class="tl-time">06:00</span>
+          <span class="tl-name">택시로 공항 이동</span>
+          <span class="badge badge-go">이동</span>
+        </div>
+        <div class="tl-card-body">
+          <p class="tl-desc">Nishitetsu Grand Hotel → 후쿠오카 공항 국제선. 택시 약 10~15분 · 2,000~2,500엔. 06:30 공항 도착 목표.</p>
+          <p class="tl-tip">💡 새벽이라 택시가 가장 편해요. 출발 2시간 전 도착 권장!</p>
+        </div>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot" style="background:#2a5c8a;"></div>
+      <div class="tl-card">
+        <div class="tl-card-head">
+          <span class="tl-time">06:30</span>
+          <span class="tl-name">출국 수속 · 탑승 대기</span>
+          <span class="badge badge-go">탑승</span>
+        </div>
+        <div class="tl-card-body">
+          <p class="tl-desc">국제선 체크인 · 수하물 위탁 · 출국심사 · 면세 쇼핑.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="flight-card" style="margin-top:1rem;">
+    <div class="flight-row">
+      <span class="f-time">08:30</span>
+      <span class="f-line"></span>
+      <span class="f-time">09:45</span>
+    </div>
+    <div class="f-detail">후쿠오카 FUK → 청주 CJJ · 에어로케이항공 RF331 · 귀국 ✈</div>
+  </div>
+</section>
+
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+function showDay(id) {
+  document.querySelectorAll('.day-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  const idx = ['d1','d2','d3','d4','d5','d6'].indexOf(id);
+  document.querySelectorAll('.nav-btn')[idx].classList.add('active');
+  setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 100);
+  initMap(id);
+}
+
+const TILE = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+const ATTR = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>';
+const maps = {};
+
+const markerColors = {
+  hotel: '#1a1510', food: '#a83030', shop: '#8a5e20',
+  go: '#2a5c8a', see: '#2e6b2e', fes: '#2e6b2e'
+};
+
+function makeIcon(color, label) {
+  return L.divIcon({
+    className: '',
+    html: `<div style="
+      background:${color};
+      color:white;
+      width:28px;height:28px;
+      border-radius:50% 50% 50% 0;
+      transform:rotate(-45deg);
+      border:2px solid white;
+      box-shadow:0 2px 6px rgba(0,0,0,0.3);
+      display:flex;align-items:center;justify-content:center;
+    "><span style="transform:rotate(45deg);font-size:13px;">${label}</span></div>`,
+    iconSize: [28, 28],
+    iconAnchor: [14, 28],
+    popupAnchor: [0, -30]
+  });
+}
+
+const dayData = {
+  d1: {
+    center: [33.5887, 130.4194], zoom: 14,
+    markers: [
+      { latlng: [33.5887, 130.4194], label: '🏨', color: markerColors.hotel, popup: '✈ 출발지<br>VIA INN 하카타구치<br>숙박' }
+    ]
+  },
+  d2: {
+    center: [33.5, 131.0], zoom: 9,
+    markers: [
+      { latlng: [33.5896, 130.4195], label: '🚌', color: markerColors.go, popup: '유유 버스투어 출발<br>하카타 버스터미널' },
+      { latlng: [33.3628, 130.9415], label: '🏞', color: markerColors.see, popup: '히타 경유' },
+      { latlng: [33.2846, 131.4913], label: '♨', color: markerColors.see, popup: '벳부 경유' },
+      { latlng: [33.2836, 131.3623], label: '🏨', color: markerColors.hotel, popup: '유후인 하차 · 체크인<br>키쇼카이운테이 무진조' }
+    ]
+  },
+  d3: {
+    center: [33.2800, 131.3750], zoom: 14,
+    markers: [
+      { latlng: [33.2773, 131.3892], label: '🌊', color: markerColors.see, popup: '긴린코 (金鱗湖)<br>유후인 대표 명소' },
+      { latlng: [33.2790, 131.3720], label: '🌸', color: markerColors.see, popup: '유후인 플로랄 빌리지' },
+      { latlng: [33.2803, 131.3760], label: '🛍', color: markerColors.shop, popup: '유노츠보 거리 쇼핑' },
+      { latlng: [33.2833, 131.3640], label: '🏨', color: markerColors.hotel, popup: '키쇼카이운테이 무진조<br>온천 · 석식' }
+    ]
+  },
+  d4: {
+    center: [33.5, 131.0], zoom: 9,
+    markers: [
+      { latlng: [33.2836, 131.3623], label: '🚌', color: markerColors.go, popup: '유후인 버스센터 출발<br>3,250엔/인 · 약 2.5시간' },
+      { latlng: [33.5919, 130.4003], label: '🚏', color: markerColors.go, popup: '텐진 고속버스터미널 도착' },
+      { latlng: [33.5896, 130.3956], label: '🏨', color: markerColors.hotel, popup: 'Nishitetsu Grand Hotel<br>텐진 다이묘 체크인' },
+      { latlng: [33.5898, 130.4056], label: '🍲', color: markerColors.food, popup: '모츠나베 락텐치 WEST ⭐4.8<br>후쿠오카 대표 곱창전골' }
+    ]
+  },
+  d5: {
+    center: [33.5875, 130.4035], zoom: 14,
+    markers: [
+      { latlng: [33.5896, 130.3948], label: '🥪', color: markerColors.food, popup: 'Park South Sandwich ⭐4.5<br>조식 · 도보 1분' },
+      { latlng: [33.5908, 130.3987], label: '🛍', color: markerColors.shop, popup: '텐진 지하상가 · 솔라리아 플라자' },
+      { latlng: [33.5854, 130.3977], label: '🐟', color: markerColors.food, popup: '우오츄 ⭐4.4<br>가이센동 · 11:30 오픈런' },
+      { latlng: [33.5930, 130.4105], label: '🎏', color: markerColors.fes, popup: '구시다 신사<br>야마카사 가자리야마 관람' },
+      { latlng: [33.5936, 130.4083], label: '🏮', color: markerColors.fes, popup: '카와바타 상점가<br>기념품 쇼핑' },
+      { latlng: [33.5900, 130.4112], label: '🏬', color: markerColors.shop, popup: '캐널시티 하카타<br>야외 야마카사 전시' },
+      { latlng: [33.5823, 130.4037], label: '🍣', color: markerColors.food, popup: '이치이 스시 ⭐4.6<br>오마카세 · 17:30 오픈' },
+      { latlng: [33.5883, 130.4012], label: '🍢', color: markerColors.fes, popup: '야타이 포장마차<br>텐진 나카강변 · 20:00~' }
+    ]
+  },
+  d6: {
+    center: [33.5700, 130.4300], zoom: 12,
+    markers: [
+      { latlng: [33.5896, 130.3956], label: '🚕', color: markerColors.go, popup: '택시 출발 06:00<br>2,000~2,500엔 · 약 15분' },
+      { latlng: [33.5903, 130.4502], label: '✈', color: markerColors.go, popup: '후쿠오카 공항 FUK<br>06:30 도착 · 08:30 출발' }
+    ]
+  }
+};
+
+function initMap(id) {
+  if (maps[id]) { maps[id].invalidateSize(); return; }
+  const data = dayData[id];
+  const mapEl = document.getElementById('map' + id.replace('d',''));
+  if (!mapEl) return;
+  const m = L.map(mapEl, { zoomControl: true, scrollWheelZoom: false });
+  L.tileLayer(TILE, { attribution: ATTR, maxZoom: 19 }).addTo(m);
+  m.setView(data.center, data.zoom);
+  data.markers.forEach((mk, i) => {
+    L.marker(mk.latlng, { icon: makeIcon(mk.color, mk.label) })
+      .addTo(m)
+      .bindPopup(`<div style="font-family:'Noto Sans KR',sans-serif;font-size:12px;line-height:1.6;">${mk.popup}</div>`);
+  });
+  if (data.markers.length > 1 && (id === 'd2' || id === 'd4')) {
+    const coords = data.markers.map(mk => mk.latlng);
+    L.polyline(coords, { color: '#c8602a', weight: 2, dashArray: '6,6', opacity: 0.7 }).addTo(m);
+  }
+  if (id === 'd5') {
+    const coords = data.markers.map(mk => mk.latlng);
+    L.polyline(coords, { color: '#8a5e20', weight: 1.5, dashArray: '4,4', opacity: 0.5 }).addTo(m);
+  }
+  maps[id] = m;
+}
+
+// Init first map on load
+window.addEventListener('load', () => initMap('d1'));
+</script>
+</body>
+</html>
