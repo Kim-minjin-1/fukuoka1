@@ -309,6 +309,104 @@ main { max-width: 900px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
   .day-header { gap: 12px; }
   .hero-title { font-size: 1.8rem; }
 }
+
+/* ── LIST FORM ── */
+.list-form {
+  background: white;
+  border: 1px solid var(--sand-dark);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 1rem;
+}
+.form-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.form-input {
+  flex: 1;
+  min-width: 120px;
+  padding: 9px 12px;
+  font-size: 13px;
+  font-family: 'Noto Sans KR', sans-serif;
+  border: 1px solid var(--sand-dark);
+  border-radius: 8px;
+  background: var(--sand);
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.2s;
+}
+.form-input.wide { flex: 2; }
+.form-input:focus { border-color: var(--accent); background: white; }
+.form-input::placeholder { color: var(--ink-light); }
+.form-btn {
+  padding: 9px 20px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.15s;
+}
+.form-btn:hover { opacity: 0.85; }
+
+/* ── LIST ITEMS ── */
+.list-empty {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  font-size: 13px;
+  color: var(--ink-light);
+  background: white;
+  border: 1px dashed var(--sand-dark);
+  border-radius: 12px;
+}
+.list-items { display: flex; flex-direction: column; gap: 8px; }
+.list-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: white;
+  border: 1px solid var(--sand-dark);
+  border-radius: 10px;
+  padding: 11px 14px;
+  transition: box-shadow 0.15s;
+}
+.list-item:hover { box-shadow: 0 2px 10px rgba(0,0,0,0.07); }
+.li-region {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 9px;
+  border-radius: 20px;
+  background: var(--sand-dark);
+  color: var(--ink-muted);
+  white-space: nowrap;
+}
+.li-center { flex: 1; }
+.li-main { font-size: 13px; font-weight: 500; color: var(--ink); }
+.li-sub { font-size: 12px; color: var(--ink-muted); margin-top: 2px; }
+.li-del {
+  background: none;
+  border: 1px solid var(--sand-dark);
+  color: var(--ink-light);
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+.li-del:hover { background: var(--red-light); color: var(--red); border-color: var(--red-light); }
+
+@media (max-width: 500px) {
+  .form-input { min-width: 100%; }
+  .form-btn { width: 100%; }
+}
 </style>
 </head>
 <body>
@@ -332,6 +430,8 @@ main { max-width: 900px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
   <button class="nav-btn" onclick="showDay('d4')">DAY 4 · 7/2</button>
   <button class="nav-btn" onclick="showDay('d5')">DAY 5 · 7/3</button>
   <button class="nav-btn" onclick="showDay('d6')">DAY 6 · 7/4</button>
+  <button class="nav-btn" onclick="showDay('shopping')" style="color:#e0a040;">🛍 쇼핑 리스트</button>
+  <button class="nav-btn" onclick="showDay('restaurant')" style="color:#e07060;">🍣 음식점 리스트</button>
 </nav>
 
 <main>
@@ -767,6 +867,56 @@ main { max-width: 900px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
   </div>
 </section>
 
+<!-- ═══════════════ 쇼핑 리스트 ═══════════════ -->
+<section class="day-section" id="shopping">
+  <div class="day-header">
+    <div class="day-num-block" style="background:#8a5e20; color:white; font-size:22px;">
+      <span>🛍</span>
+    </div>
+    <div class="day-title-block">
+      <h2>쇼핑 리스트</h2>
+      <p>지역 · 제품 · 가게 이름 또는 주소</p>
+    </div>
+  </div>
+
+  <div class="list-form" id="shopping-form">
+    <div class="form-row">
+      <input class="form-input" id="sh-region" placeholder="지역 (예: 텐진, 유후인)" />
+      <input class="form-input" id="sh-item" placeholder="제품 (예: 유후인 롤케이크)" />
+      <input class="form-input wide" id="sh-store" placeholder="가게 이름 또는 주소" />
+      <button class="form-btn" onclick="addItem('shopping')">저장</button>
+    </div>
+  </div>
+
+  <div class="list-empty" id="shopping-empty">아직 추가된 항목이 없어요. 위에서 입력 후 저장하세요!</div>
+  <div class="list-items" id="shopping-list"></div>
+</section>
+
+<!-- ═══════════════ 음식점 리스트 ═══════════════ -->
+<section class="day-section" id="restaurant">
+  <div class="day-header">
+    <div class="day-num-block" style="background:#a83030; color:white; font-size:22px;">
+      <span>🍣</span>
+    </div>
+    <div class="day-title-block">
+      <h2>음식점 리스트</h2>
+      <p>지역 · 메뉴 · 가게 이름 또는 주소</p>
+    </div>
+  </div>
+
+  <div class="list-form" id="restaurant-form">
+    <div class="form-row">
+      <input class="form-input" id="rs-region" placeholder="지역 (예: 하카타, 나카스)" />
+      <input class="form-input" id="rs-menu" placeholder="메뉴 (예: 모츠나베, 스시)" />
+      <input class="form-input wide" id="rs-store" placeholder="가게 이름 또는 주소" />
+      <button class="form-btn" style="background:#a83030;" onclick="addItem('restaurant')">저장</button>
+    </div>
+  </div>
+
+  <div class="list-empty" id="restaurant-empty">아직 추가된 항목이 없어요. 위에서 입력 후 저장하세요!</div>
+  <div class="list-items" id="restaurant-list"></div>
+</section>
+
 </main>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -775,10 +925,13 @@ function showDay(id) {
   document.querySelectorAll('.day-section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  const idx = ['d1','d2','d3','d4','d5','d6'].indexOf(id);
+  const allIds = ['d1','d2','d3','d4','d5','d6','shopping','restaurant'];
+  const idx = allIds.indexOf(id);
   document.querySelectorAll('.nav-btn')[idx].classList.add('active');
-  setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 100);
-  initMap(id);
+  if (!['shopping','restaurant'].includes(id)) {
+    setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 100);
+    initMap(id);
+  }
 }
 
 const TILE = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
@@ -890,7 +1043,90 @@ function initMap(id) {
 }
 
 // Init first map on load
-window.addEventListener('load', () => initMap('d1'));
+window.addEventListener('load', () => {
+  initMap('d1');
+  renderList('shopping');
+  renderList('restaurant');
+});
+
+// ── LIST MANAGEMENT ──
+const memStore = {};
+function getItems(type) {
+  try {
+    const raw = localStorage.getItem('hm_' + type);
+    return raw ? JSON.parse(raw) : (memStore[type] || []);
+  } catch(e) {
+    return memStore[type] || [];
+  }
+}
+function saveItems(type, items) {
+  memStore[type] = items;
+  try { localStorage.setItem('hm_' + type, JSON.stringify(items)); } catch(e) {}
+}
+
+function addItem(type) {
+  let col1, col2, col3;
+  if (type === 'shopping') {
+    col1 = document.getElementById('sh-region').value.trim();
+    col2 = document.getElementById('sh-item').value.trim();
+    col3 = document.getElementById('sh-store').value.trim();
+  } else {
+    col1 = document.getElementById('rs-region').value.trim();
+    col2 = document.getElementById('rs-menu').value.trim();
+    col3 = document.getElementById('rs-store').value.trim();
+  }
+  if (!col2) {
+    const inp = type === 'shopping' ? document.getElementById('sh-item') : document.getElementById('rs-menu');
+    inp.focus(); inp.style.borderColor = '#a83030';
+    setTimeout(() => inp.style.borderColor = '', 1200);
+    return;
+  }
+  const items = getItems(type);
+  items.push({ id: Date.now(), col1, col2, col3 });
+  saveItems(type, items);
+  // clear inputs
+  if (type === 'shopping') {
+    document.getElementById('sh-region').value = '';
+    document.getElementById('sh-item').value = '';
+    document.getElementById('sh-store').value = '';
+  } else {
+    document.getElementById('rs-region').value = '';
+    document.getElementById('rs-menu').value = '';
+    document.getElementById('rs-store').value = '';
+  }
+  renderList(type);
+}
+
+function deleteItem(type, id) {
+  const items = getItems(type).filter(i => i.id !== id);
+  saveItems(type, items);
+  renderList(type);
+}
+
+function renderList(type) {
+  const items = getItems(type);
+  const listEl = document.getElementById(type + '-list');
+  const emptyEl = document.getElementById(type + '-empty');
+  const label2 = type === 'shopping' ? '제품' : '메뉴';
+  const label3 = '가게 / 주소';
+
+  if (!items.length) {
+    emptyEl.style.display = 'block';
+    listEl.innerHTML = '';
+    return;
+  }
+  emptyEl.style.display = 'none';
+  listEl.innerHTML = items.map(item => `
+    <div class="list-item">
+      ${item.col1 ? `<span class="li-region">${item.col1}</span>` : ''}
+      <div class="li-center">
+        <div class="li-main">${item.col2}</div>
+        ${item.col3 ? `<div class="li-sub">${item.col3}</div>` : ''}
+      </div>
+      <button class="li-del" onclick="deleteItem('${type}', ${item.id})">삭제</button>
+    </div>
+  `).join('');
+}
 </script>
 </body>
 </html>
